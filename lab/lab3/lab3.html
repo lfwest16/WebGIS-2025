@@ -34,7 +34,10 @@
         crossOrigin: 'anonymous'
       })
     });
-
+var baseGroup = new ol.layer.Group({
+title: 'Base maps',
+layers: [azureRoad, OSM]
+});
     // --- Map Setup ---
     const map = new ol.Map({
       target: 'map',
