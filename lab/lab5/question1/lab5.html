@@ -1,4 +1,21 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lab 5: Generative AI for Web Mapping</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+body {
+font-family: Arial, sans-serif;
+display: flex;
+flex-direction: column;
+align-items: center;
+margin: 0;
+padding: 0;
+}
+h1 {
 margin-top: 10px;
 }
 #controls {
@@ -21,7 +38,7 @@ margin-top: 5px;
 </style>
 </head>
 <body>
-<h1>Lab 5: Generative AI for Web Mapping Question 1</h1>
+<h1>Lab 5: Generative AI for Web Mapping</h1>
 <div class="name-field">
 <label for="studentName">Name:</label>
 <input type="text" id="studentName" placeholder="Leah West" />
@@ -76,20 +93,4 @@ map.addLayer(osm);
 map.removeLayer(esri);
 } else {
 map.addLayer(esri);
-map.removeLayer(osm);
-}
-});
-});
-
-
-// WMS layer toggle
-document.getElementById('wmsToggle').addEventListener('change', (event) => {
-if (event.target.checked) {
-map.addLayer(wmsLayer);
-} else {
-map.removeLayer(wmsLayer);
-}
-});
-</script>
-</body>
 </html>
