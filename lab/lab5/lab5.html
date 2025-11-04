@@ -1,1 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 5: Generative AI for Web Mapping</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@latest/ol.css">
+  <script src="https://cdn.jsdelivr.net/npm/ol@latest/dist/ol.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      text-align: center;
+      margin-top: 10px;
+    }
+    #controls {
+      margin: 10px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    #map {
+      width: 90%;
+      height: 600px;
+      border: 2px solid #333;
+    }
+    .label {
+      font-weight: bold;
+    }
+    .name-field {
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Lab 5: Generative AI for Web Mapping</h1>
+  <div class="name-field">
+    <label for="studentName">Name:</label>
+    <input type="text" id="studentName" placeholder="Leah West" />
+  </div>
+
+  <div id="controls">
+    <span class="label">Basemap:</span>
+    <label><input type="radio" name="basemap" value="osm" checked> OSM</label>
+    <label><input type="radio" name="basemap" value="esri"> ESRI Imagery</label>
+    <label><input type="checkbox" id="wmsToggle" checked> Show WMS Layer</label>
+  </div>
+
+  <div id="map"></div>
+
+  <script>
+    // Base layers
+    const osmLayer = new ol.layer.Tile({
+      source: new ol.source.OSM(),
+      visible: true
+    });
+
+    const esriLayer = new ol.layer.Tile({
+      source: new ol.source.XYZ({
+        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        attributions: 'Tiles © Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+      }),
+      visible: false
+    });
+
+    // WMS Layer
+    const wmsLayer = new ol.layer.Tile({
+      source: new ol.source.TileWMS({
+        url: 'https://ahocevar.com/geoserver/wms',
+        params: {
+          'LAYERS': 'topp:states',
+          'TILED': true,
+          'FORMAT': 'image/png'
+        },
+        serverType: 'geoserver',
+        crossOrigin: 'anonymous'
+      }),
+      visible: true
+    });
+
+    // Map
+    const map = new ol.Map({
+      target: 'map',
+      layers: [osmLayer, esriLayer, wmsLayer],
+      view: new ol.View({
+        center: ol.proj.fromLonLat([-98.5795, 39.8283]), // Center on continental US
+        zoom: 4
+      })
+    });
+
+    // Basemap switcher logic
+    document.querySelectorAll('input[name="basemap"]').forEach(radio => {
+      radio.addEventListener('change', (event) => {
+        const value = event.target.value;
+        osmLayer.setVisible(value === 'osm');
+        esriLayer.setVisible(value === 'esri');
+      });
+    });
+
+    // WMS layer toggle
+    document.getElementById('wmsToggle').addEventListener('change', (event) => {
+      wmsLayer.setVisible(event.target.checked);
+    });
+  </script>
+</body>
+</html>
 
