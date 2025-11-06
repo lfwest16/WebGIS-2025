@@ -4,8 +4,17 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Lab 5: Generative AI for Web Mapping</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link
+rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+integrity="sha256-sA+z0pRlG1Jd4vVh+3I9kpZnpYvCkE4FZH5v9P2Jp6w="
+crossorigin=""
+/>
+<script
+src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+integrity="sha256-o9N1jD9J6QYh+2r0A7aC2A9zR9HEzZ1PcIu1MXT0kL8="
+crossorigin=""
+></script>
 <style>
 body {
 font-family: Arial, sans-serif;
@@ -57,11 +66,9 @@ margin-top: 5px;
 
 
 <script>
+document.addEventListener('DOMContentLoaded', function () {
 // Initialize map centered on continental US
-const map = L.map('map', {
-center: [39.8283, -98.5795],
-zoom: 4
-});
+const map = L.map('map').setView([39.8283, -98.5795], 4);
 
 
 // Base layers
@@ -75,12 +82,14 @@ attribution: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, 
 });
 
 
-// WMS Layer
+// WMS Layer (properly configured)
 const wmsLayer = L.tileLayer.wms('https://ahocevar.com/geoserver/wms', {
 layers: 'topp:states',
 format: 'image/png',
 transparent: true,
-attribution: 'GeoServer WMS: topp:states'
+version: '1.1.1',
+attribution: 'GeoServer WMS: topp:states',
+crossOrigin: true
 }).addTo(map);
 
 
@@ -89,10 +98,9 @@ document.querySelectorAll('input[name="basemap"]').forEach(radio => {
 radio.addEventListener('change', (event) => {
 const value = event.target.value;
 if (value === 'osm') {
-map.addLayer(osm);
-map.removeLayer(esri);
+if (!map.hasLayer(osm)) map.addLayer(osm);
+if (map.hasLayer(esri)) map.removeLayer(esri);
 } else {
-map.addLayer(esri);
-map.removeLayer(osm);
-}
-});
+if (!map.hasLayer(esri)) map.addLayer(esri);
+if (map.hasLayer(osm)) map.removeLayer(osm);
+</html>
