@@ -1,1 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenLayers Basemap Switcher</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configure Tailwind for custom colors/font -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-blue': '#1c7ed6',
+                        'bg-dark': '#2c3e50',
+                        'bg-light': '#ecf0f1',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Load OpenLayers CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v8.2.0/ol.css">
+    <style>
+        /* Set the map to fill the screen */
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
 
+        /* Custom style for the control panel appearance */
+        .control-panel {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Styling for the openlayers attribution on top of imagery */
+        .ol-attribution {
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased m-0 p-0 overflow-hidden">
+
+    <!-- Map Container -->
+    <div id="map"></div>
+
+    <!-- Control Panel -->
+    <div class="control-panel">
+        <h3 class="font-bold text-lg mb-3 text-gray-700 border-b pb-2">Map Layers</h3>
+
+        <!-- Basemap Switcher -->
+        <fieldset class="mb-4">
+            <legend class="text-sm font-semibold text-gray-900 mb-2">Basemaps</legend>
+
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center">
+                    <input id="osm-radio" name="basemap" type="radio" checked
+                           class="h-4 w-4 text-primary-blue border-gray-300 focus:ring-primary-blue"
+                           value="OSM">
+                    <label for="osm-radio" class="ml-2 block text-sm font-medium text-gray-700">OSM</label>
+                </div>
+                <div class="flex items-center">
+                    <input id="esri-radio" name="basemap" type="radio"
+                           class="h-4 w-4 text-primary-blue border-gray-300 focus:ring-primary-blue"
+                           value="ESRI">
+                    <label for="esri-radio" class="ml-2 block text-sm font-medium text-gray-700">ESRI Imagery</label>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- WMS Layer Toggle -->
+        <div class="relative flex items-start">
+            <div class="flex items-center h-5">
+                <input id="wms-toggle" type="checkbox" checked
+                       class="focus:ring-primary-blue h-4 w-4 text-primary-blue border-gray-300 rounded">
+            </div>
+            <div class="ml-3 text-sm">
+                <label for="wms-toggle" class="font-medium text-gray-700">GeoServer States (WMS)</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load OpenLayers JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/ol@v8.2.0/dist/ol.js"></script>
+    <script>
+        // Use explicit references starting with 'ol.' for reliable access to OpenLayers components
+        // The previous use of destructuring (e.g., const { Map, View } = ol;) was causing issues
+        // when loading the library globally via a script tag.
+
+        // Define Basemaps
+        const osmLayer = new ol.layer.Tile({
+            source: new ol.source.OSM(),
+            title: 'OSM Basemap',
+            type: 'base',
+            visible: true,
+        });
+
+        const esriImageryLayer = new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                attributions: 'Tiles © Esri, Maxar, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community'
+            }),
+            title: 'ESRI Imagery Basemap',
+            type: 'base',
+            visible: false,
+        });
+
+        // Define WMS Layer
+        // FIX: Changed layer type from ol.layer.TileWMS to ol.layer.Tile
+        // This is a common pattern when using a global script load of OpenLayers, as the TileWMS
+        // layer class may not be directly exposed, but ol.layer.Tile works correctly with ol.source.TileWMS.
+        const wmsLayer = new ol.layer.Tile({
+            title: 'topp:states WMS',
+            source: new ol.source.TileWMS({
+                url: 'https://ahocevar.com/geoserver/wms',
+                params: {
+                    'LAYERS': 'topp:states',
+                    'TILED': true,
+                    'FORMAT': 'image/png' // Requesting PNG for transparency
+                },
+                serverType: 'geoserver',
+                crossOrigin: 'anonymous',
+            }),
+            visible: document.getElementById('wms-toggle').checked, // Initial visibility based on checkbox
+            opacity: 0.7 // Add some transparency to see the basemap beneath
+        });
+
+        // Initialize the Map
+        const map = new ol.Map({
+            target: 'map',
+            layers: [osmLayer, esriImageryLayer, wmsLayer], // Order matters for drawing
+            view: new ol.View({
+                // Center on the continental US (~-98W, 39N)
+                center: ol.proj.fromLonLat([-98, 39]),
+                zoom: 4,
+                minZoom: 2,
+                maxZoom: 18,
+            }),
+        });
+
+        // --- Event Handlers ---
+
+        // 1. Basemap Switcher Logic (Radio Buttons)
+        const basemapRadios = document.querySelectorAll('input[name="basemap"]');
+
+        basemapRadios.forEach(radio => {
+            radio.addEventListener('change', (event) => {
+                const selectedMap = event.target.value;
+
+                if (selectedMap === 'OSM') {
+                    osmLayer.setVisible(true);
+                    esriImageryLayer.setVisible(false);
+                } else if (selectedMap === 'ESRI') {
+                    osmLayer.setVisible(false);
+                    esriImageryLayer.setVisible(true);
+                }
+            });
+        });
+
+        // 2. WMS Layer Toggle (Checkbox)
+        const wmsToggle = document.getElementById('wms-toggle');
+
+        wmsToggle.addEventListener('change', () => {
+            wmsLayer.setVisible(wmsToggle.checked);
+        });
+
+    </script>
+
+</body>
+</html>
