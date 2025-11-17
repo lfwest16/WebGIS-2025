@@ -4,103 +4,113 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Lab 5: Generative AI for Web Mapping</title>
-<link
-rel="stylesheet"
-href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-integrity="sha256-sA+z0pRlG1Jd4vVh+3I9kpZnpYvCkE4FZH5v9P2Jp6w="
-crossorigin=""
-/>
-<script
-src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-integrity="sha256-o9N1jD9J6QYh+2r0A7aC2A9zR9HEzZ1PcIu1MXT0kL8="
-crossorigin=""
-></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <style>
 body {
-font-family: Arial, sans-serif;
-display: flex;
-flex-direction: column;
-align-items: center;
-margin: 0;
-padding: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: 0;
 }
 h1 {
-margin-top: 10px;
+  margin-top: 10px;
 }
 #controls {
-margin: 10px;
-display: flex;
-gap: 15px;
-align-items: center;
+  margin: 10px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
 }
 #map {
-width: 90%;
-height: 600px;
-border: 2px solid #333;
-}
-.label {
-font-weight: bold;
-}
-.name-field {
-margin-top: 5px;
+  width: 90%;
+  height: 600px;
+  border: 2px solid #333;
 }
 </style>
 </head>
+
 <body>
 <h1>Lab 5: Generative AI for Web Mapping</h1>
+
 <div class="name-field">
 <label for="studentName">Name:</label>
 <input type="text" id="studentName" placeholder="Leah West" />
 </div>
 
-
 <div id="controls">
-<span class="label">Basemap:</span>
-<label><input type="radio" name="basemap" value="osm" checked> OSM</label>
-<label><input type="radio" name="basemap" value="esri"> ESRI Imagery</label>
-<label><input type="checkbox" id="wmsToggle" checked> Show WMS Layer</label>
+  <span class="label">Basemap:</span>
+  <label><input type="radio" name="basemap" value="osm" checked> OSM</label>
+  <label><input type="radio" name="basemap" value="esri"> ESRI Imagery</label>
+  <label><input type="checkbox" id="wmsToggle" checked> Show WMS Layer</label>
+  <label><input type="checkbox" id="elevToggle"> Elevation</label>
 </div>
-
 
 <div id="map"></div>
 
-
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-// Initialize map centered on continental US
-const map = L.map('map').setView([39.8283, -98.5795], 4);
-
-
-// Base layers
-const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-attribution: '© OpenStreetMap contributors'
-}).addTo(map);
-
-
-const esri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-attribution: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+// Initialize map
+const map = L.map("map", {
+  center: [39.8283, -98.5795],
+  zoom: 4
 });
 
-
-// WMS Layer (properly configured)
-const wmsLayer = L.tileLayer.wms('https://ahocevar.com/geoserver/wms', {
-layers: 'topp:states',
-format: 'image/png',
-transparent: true,
-version: '1.1.1',
-attribution: 'GeoServer WMS: topp:states',
-crossOrigin: true
+// Base layers
+const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "© OpenStreetMap contributors"
 }).addTo(map);
 
+const esri = L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  {
+    attribution: "Tiles © Esri, USGS, USDA"
+  }
+);
 
-// Basemap switcher logic
-document.querySelectorAll('input[name="basemap"]').forEach(radio => {
-radio.addEventListener('change', (event) => {
-const value = event.target.value;
-if (value === 'osm') {
-if (!map.hasLayer(osm)) map.addLayer(osm);
-if (map.hasLayer(esri)) map.removeLayer(esri);
-} else {
-if (!map.hasLayer(esri)) map.addLayer(esri);
-if (map.hasLayer(osm)) map.removeLayer(osm);
+// Elevation Layer
+const elevation = L.tileLayer(
+  "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+  {
+    maxZoom: 17,
+    attribution: "© OpenTopoMap, © SRTM"
+  }
+);
+
+// WMS Layer
+const wmsLayer = L.tileLayer.wms("https://ahocevar.com/geoserver/wms", {
+  layers: "topp:states",
+  format: "image/png",
+  transparent: true
+}).addTo(map);
+
+// Basemap switcher (FIXED: previously broken)
+document.querySelectorAll("input[name='basemap']").forEach(radio => {
+  radio.addEventListener("change", (event) => {
+    const value = event.target.value;
+
+    if (value === "osm") {
+      map.addLayer(osm);
+      map.removeLayer(esri);
+    } else {
+      map.addLayer(esri);
+      map.removeLayer(osm);
+    }
+  });
+});
+
+// WMS toggle
+document.getElementById("wmsToggle").addEventListener("change", function () {
+  this.checked ? map.addLayer(wmsLayer) : map.removeLayer(wmsLayer);
+});
+
+// Elevation toggle
+document.getElementById("elevToggle").addEventListener("change", function () {
+  this.checked ? map.addLayer(elevation) : map.removeLayer(elevation);
+});
+</script>
+
+</body>
 </html>
