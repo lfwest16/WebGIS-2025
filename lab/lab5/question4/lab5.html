@@ -26,7 +26,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/ol/ol.js"></script>
   <script>
-    // --- Basemap layers ---
+    // Basemap layers
     const osmLayer = new ol.layer.Tile({
       source: new ol.source.OSM(),
       visible: true
@@ -40,35 +40,32 @@
       visible: false
     });
 
-    // --- WMS layer ---
+    // WMS layer (fixed FORMAT and projection)
     const wmsLayer = new ol.layer.Image({
       source: new ol.source.ImageWMS({
         url: 'https://ahocevar.com/geoserver/wms',
-        params: { 'LAYERS': 'topp:states' },
-        ratio: 1,
-        serverType: 'geoserver'
+        params: { 'LAYERS': 'topp:states', 'FORMAT': 'image/png' },
+        serverType: 'geoserver',
+        projection: 'EPSG:3857'
       }),
       visible: true
     });
 
-    // --- Map setup ---
+    // Map setup
     const map = new ol.Map({
       target: 'map',
       layers: [osmLayer, esriLayer, wmsLayer],
       view: new ol.View({
-        center: ol.proj.fromLonLat([-98.5, 39.8]), // continental US center
-        zoom: 4,
-        projection: 'EPSG:3857'
-      }),
-      renderer: 'canvas' // force canvas rendering
+        center: ol.proj.fromLonLat([-98.5, 39.8]), // continental US
+        zoom: 4
+      })
     });
 
-    // --- Controls ---
+    // Controls
     document.querySelectorAll('input[name="basemap"]').forEach(radio => {
       radio.addEventListener('change', function() {
-        const choice = this.value;
-        osmLayer.setVisible(choice === 'osm');
-        esriLayer.setVisible(choice === 'esri');
+        osmLayer.setVisible(this.value === 'osm');
+        esriLayer.setVisible(this.value === 'esri');
       });
     });
 
