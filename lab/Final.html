@@ -3,35 +3,222 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ArcGIS Embedded Map</title>
+  <title>Web GIS Final</title>
 
-  <!-- Load ArcGIS embeddable component -->
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <!-- ArcGIS embeddable component -->
   <script type="module" src="https://js.arcgis.com/4.34/embeddable-components/"></script>
 
   <style>
-    body {
+    :root {
+      --bg: #f3f4f6;
+      --card-bg: #ffffff;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --accent: #9ca3af;
+      --border-subtle: #e5e7eb;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
       margin: 0;
-      padding: 20px;
-      font-family: Arial, sans-serif;
+      padding: 0;
+      height: 100%;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #e5e7eb 0, #f9fafb 40%, #f3f4f6 100%);
+      color: var(--text-main);
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 32px 16px;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 18px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 1px 3px rgba(15, 23, 42, 0.08);
+      padding: 24px 24px 28px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .title-block {
+      flex: 1 1 auto;
+      min-width: 220px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .tag {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--accent);
+      font-size: 0.7rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .divider {
+      margin: 16px 0 18px;
+      height: 1px;
+      width: 100%;
+      background: linear-gradient(to right, transparent, var(--accent), transparent);
+      opacity: 0.6;
+    }
+
+    .description {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+
+    .map-wrapper {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+      background: #f9fafb;
+    }
+
+    .map-header {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .map-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .map-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .map-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #10b981;
+      display: inline-block;
+    }
+
+    arcgis-embedded-map {
+      display: block;
+      width: 100%;
+      height: 520px; /* adjust map height here if needed */
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 16px 10px;
+      }
+      .card {
+        padding: 18px 16px 22px;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      arcgis-embedded-map {
+        height: 420px;
+      }
     }
   </style>
 </head>
 
 <body>
+  <div class="page">
+    <div class="card">
+      <header class="header">
+        <div class="title-block">
+          <h1>Web GIS Final</h1>
+          <div class="subtitle">Leah West</div>
+        </div>
+        <div class="tag">ArcGIS Online · Web Map</div>
+      </header>
 
-  <h2>My ArcGIS Map</h2>
+      <div class="divider"></div>
 
-  <!-- Your embedded map component -->
-  <arcgis-embedded-map
-    style="height:600px; width:100%; max-width:900px;"
-    item-id="cb74e65ddff04309a7182391c5ab9ca1"
-    theme="light"
-    legend-enabled
-    share-enabled
-    center="-80.84839565667123,35.40656527569375"
-    scale="72223.819286"
-    portal-url="https://www.arcgis.com">
-  </arcgis-embedded-map>
+      <p class="description">
+        This page presents an ArcGIS Online web map as part of the Web GIS Final project. 
+        Explore the map below to view the spatial data, interact with layers, and use the built-in 
+        legend and sharing tools provided by the ArcGIS embeddable map component.
+      </p>
 
-</body>
-</html>
+      <section class="map-wrapper">
+        <div class="map-header">
+          <div class="map-title">Interactive Map View</div>
+          <div class="map-meta">
+            <span><span class="dot"></span> Live content</span>
+            <span>Theme: Light</span>
+          </div>
+        </div>
+
+        <!-- Embedded ArcGIS map -->
+        <arcgis-embedded-map
+          item-id="cb74e65ddff04309a7182391c5ab9ca1"
+          theme="light"
+          legend-enabled
+          share-enabled
+          center="-80.84839565667123,35.40656527569375"
+          scale="72223.819286"
+          portal-url="https://www.arcgis.com">
+        </arcgis-embedded-map>
+      </section>
+    </div>
+  </div>
+</body
